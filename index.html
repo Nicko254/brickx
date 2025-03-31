@@ -706,7 +706,7 @@
         }
 
         // Direct function to handle form submission (called by button click)
-        function analyzeSuburb() {
+        function analyseSuburb() {
             // Get form values
             const suburb = document.getElementById('suburb').value;
             const budget = parseInt(document.getElementById('budget').value);
@@ -728,11 +728,11 @@
             // Show loading state
             const btnText = document.getElementById('btn-text');
             const loadingText = document.getElementById('loading-text');
-            const analyzeBtn = document.getElementById('analyze-btn');
+            const analyseBtn = document.getElementById('analyse-btn');
             
             if (btnText) btnText.style.display = 'none';
             if (loadingText) loadingText.style.display = 'inline-block';
-            if (analyzeBtn) analyzeBtn.disabled = true;
+            if (analyseBtn) analyseBtn.disabled = true;
             
             // Simulate API call
             setTimeout(() => {
@@ -821,11 +821,11 @@
             // Reset button state (for going back)
             const btnText = document.getElementById('btn-text');
             const loadingText = document.getElementById('loading-text');
-            const analyzeBtn = document.getElementById('analyze-btn');
+            const analyseBtn = document.getElementById('analyse-btn');
             
             if (btnText) btnText.style.display = 'inline-block';
            if (loadingText) loadingText.style.display = 'none';
-            if (analyzeBtn) analyzeBtn.disabled = false;
+            if (analyseBtn) analyseBtn.disabled = false;
 
             // Add event listeners to the buttons
             setupButtonListeners();
