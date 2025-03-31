@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrickX Suburb Analyzer</title>
+    <title>BrickX Suburb Analyser</title>
     <style>
         :root {
             --primary: #ff6b6b;
@@ -358,12 +358,12 @@
 <body>
     <div class="container">
         <header>
-            <h1>BrickX Suburb Analyzer</h1>
+            <h1>BrickX Suburb Analyser</h1>
             <p>Discover high-performing suburbs that match your investment strategy and budget.</p>
         </header>
 
         <!-- Input Form -->
-        <div id="analyzer-form" class="card">
+        <div id="analyser-form" class="card">
             <h2>Find Your Ideal Investment Suburb</h2>
             <p class="form-intro">Our analysis includes growth trends, rental yields, and market insights tailored to your investment goals.</p>
 
@@ -815,7 +815,7 @@
             document.getElementById('property-growth').textContent = property.growth;
             
             // Show results, hide form
-            document.getElementById('analyzer-form').style.display = 'none';
+            document.getElementById('analyser-form').style.display = 'none';
             document.getElementById('results').style.display = 'block';
             
             // Reset button state (for going back)
@@ -843,7 +843,7 @@
         // Back button functionality
         function goBack() {
             document.getElementById('results').style.display = 'none';
-            document.getElementById('analyzer-form').style.display = 'block';
+            document.getElementById('analyser-form').style.display = 'block';
         }
 
         // Set up the button listeners for interactive modals
