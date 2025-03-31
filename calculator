@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrickX Suburb Analyzer</title>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --primary-dark: #ff5252;
+            --text-dark: #333;
+            --text-medium: #666;
+            --bg-light: #f8f9fa;
+            --border-light: #e9ecef;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --secondary: #536DFE;
+            --success: #28a745;
+        }
+        * {box-sizing: border-box; margin: 0; padding: 0;}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        header p {
+            color: var(--text-medium);
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .form-intro {
+            color: var(--text-medium);
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .range-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            margin-top: 10px;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        .range-value {
+            text-align: right;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: var(--text-medium);
+        }
+        .investment-goals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .goal-option {
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 15px;
+            cursor: pointer;
+        }
+        .goal-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+        .hint {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            margin-top: 5px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #loading-text {
+            display: none;
+        }
+        
+        /* Results Styles */
+        #results {
+            display: none;
+        }
+        .back-btn {
+            color: var(--secondary);
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .suburb-profile, .investment-match {
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .profile-header, .match-header {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 500;
+        }
+        .profile-body, .match-body {
+            padding: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            margin-bottom: 3px;
+        }
+        .stat-value {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .tag {
+            background-color: #f1f3f5;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
+        .match-score {
+            margin: 15px 0;
+        }
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .score-fill {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 4px;
+        }
+        .score-value {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+        }
+        .property-card {
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+        .property-header {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 500;
+        }
+        .property-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .property-body {
+                grid-template-columns: 1fr;
+            }
+        }
+        .property-image {
+            width: 100%;
+            height: 150px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-medium);
+        }
+        .property-details h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        .property-address {
+            color: var(--text-medium);
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        .property-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .cta-card {
+            background-color: #e8f4fd;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .cta-card h3 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+        .cta-card p {
+            color: #0c5460;
+            margin-bottom: 15px;
+        }
+        .cta-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BrickX Suburb Analyzer</h1>
+            <p>Discover high-performing suburbs that match your investment strategy and budget.</p>
+        </header>
+
+        <!-- Input Form -->
+        <div id="analyzer-form" class="card">
+            <h2>Find Your Ideal Investment Suburb</h2>
+            <p class="form-intro">Our analysis includes growth trends, rental yields, and market insights tailored to your investment goals.</p>
+
+            <form id="suburb-form">
+                <div class="form-group">
+                    <label for="suburb">Suburb of Interest</label>
+                    <select id="suburb" required>
+                        <option value="">Select a suburb</option>
+                        <option value="Bondi">Bondi</option>
+                        <option value="Parramatta">Parramatta</option>
+                        <option value="Surry Hills">Surry Hills</option>
+                        <option value="Manly">Manly</option>
+                        <option value="Randwick">Randwick</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="budget">Investment Budget</label>
+                    <input type="range" id="budget" class="range-slider" min="200000" max="2000000" step="50000" value="500000">
+                    <div class="range-value">$<span id="budget-value">500,000</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Investment Goal</label>
+                    <div class="investment-goals">
+                        <div class="goal-option selected" data-goal="growth">
+                            <h3>Capital Growth</h3>
+                            <p>Focus on long-term appreciation</p>
+                        </div>
+                        <div class="goal-option" data-goal="income">
+                            <h3>Rental Income</h3>
+                            <p>Focus on strong rental yields</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="investment-goal" value="growth">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Your Email</label>
+                    <input type="email" id="email" placeholder="name@example.com" required>
+                    <p class="hint">We'll send your custom suburb report to this email.</p>
+                </div>
+
+                <button type="submit" id="analyze-btn" class="btn">
+                    <span id="btn-text">Analyze Suburb</span>
+                    <span id="loading-text"><span class="spinner"></span>Analyzing...</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="results" class="card">
+            <button id="back-btn" class="back-btn">
+                ← Back to search
+            </button>
+
+            <div class="alert alert-success">
+                <strong>Thank you!</strong> A detailed report has been sent to <span id="user-email"></span>. Below is a summary of your suburb analysis.
+            </div>
+
+            <div class="results-grid">
+                <div class="suburb-profile">
+                    <div class="profile-header">
+                        Suburb Profile: <span id="result-suburb"></span>
+                    </div>
+                    <div class="profile-body">
+                        <div class="stats-grid">
+                            <div>
+                                <div class="stat-label">Median Price</div>
+                                <div class="stat-value" id="median-price"></div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Rental Yield</div>
+                                <div class="stat-value" id="rental-yield"></div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Annual Growth</div>
+                                <div class="stat-value" id="annual-growth"></div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Vacancy Rate</div>
+                                <div class="stat-value" id="vacancy-rate"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="stat-label">Property Types</div>
+                            <div class="tags" id="property-types"></div>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <div class="stat-label">Infrastructure</div>
+                            <div class="tags" id="infrastructure"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="investment-match">
+                    <div class="match-header">
+                        Investment Suitability
+                    </div>
+                    <div class="match-body">
+                        <div>
+                            <div class="stat-label">Your Budget</div>
+                            <div class="stat-value" id="user-budget"></div>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <div class="stat-label">Your Goal</div>
+                            <div class="stat-value" id="user-goal"></div>
+                        </div>
+
+                        <div class="match-score">
+                            <div class="stat-label">Suburb Match Score</div>
+                            <div class="score-bar">
+                                <div class="score-fill" id="match-score-bar"></div>
+                            </div>
+                            <div class="score-value" id="match-score-value"></div>
+                        </div>
+
+                        <div>
+                            <div class="stat-label">Risk Level</div>
+                            <div class="stat-value" id="risk-level"></div>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <div class="stat-label">Primary Demographic</div>
+                            <div class="stat-value" id="demographic"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card">
+                <div class="property-header">
+                    Featured Investment Opportunity
+                </div>
+                <div class="property-body">
+                    <div class="property-image">
+                        Property Image
+                    </div>
+                    <div class="property-details">
+                        <h3 id="property-title"></h3>
+                        <p class="property-address" id="property-address"></p>
+
+                        <div class="property-stats">
+                            <div>
+                                <div class="stat-label">Price</div>
+                                <div class="stat-value" id="property-price"></div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Bedrooms</div>
+                                <div class="stat-value" id="property-bedrooms"></div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Bathrooms</div>
+                                <div class="stat-value" id="property-bathrooms"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="stat-label">Features</div>
+                            <div class="tags" id="property-features"></div>
+                        </div>
+
+                        <div class="property-stats" style="margin-top: 15px;">
+                            <div>
+                                <div class="stat-label">Rental Income</div>
+                                <div class="stat-value" id="property-income"></div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Yield</div>
+                                <div class="stat-value" id="property-yield"></div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Growth Proj.</div>
+                                <div class="stat-value" id="property-growth"></div>
+                            </div>
+                        </div>
+
+                        <button class="btn" style="margin-top: 15px;">Request Property Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cta-card">
+                <h3>Want personalized investment advice?</h3>
+                <p>Our property investment specialists can help you find the perfect property to match your financial goals.</p>
+                <button class="cta-btn">Book a Free Consultation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample suburb data (would be replaced with API/database in production)
+        const suburbData = {
+            'Bondi': {
+                medianPrice: 2450000,
+                rentalYield: 2.1,
+                growthRate: 8.7,
+                vacancyRate: 1.2,
+                propertyTypes: ['Apartment', 'House'],
+                infrastructure: ['Beach', 'Shopping', 'Transport'],
+                demographic: 'Young professionals',
+                risk: 'Low',
+                property: {
+                    title: 'Beachside Apartment',
+                    address: '45 Campbell Parade, Bondi NSW 2026',
+                    price: '$750,000',
+                    bedrooms: 2,
+                    bathrooms: 1,
+                    features: ['Ocean views', 'Recently renovated', 'Close to transport'],
+                    income: '$650/week',
+                    yield: '4.5%',
+                    growth: '8.7% p.a.'
+                }
+            },
+            'Parramatta': {
+                medianPrice: 950000,
+                rentalYield: 3.5,
+                growthRate: 5.2,
+                vacancyRate: 2.1,
+                propertyTypes: ['Apartment', 'Townhouse'],
+                infrastructure: ['Business district', 'University', 'Transport'],
+                demographic: 'Families',
+                risk: 'Medium',
+                property: {
+                    title: 'Modern Apartment',
+                    address: '12 Station Street, Parramatta NSW 2150',
+                    price: '$580,000',
+                    bedrooms: 2,
+                    bathrooms: 2,
+                    features: ['New building', 'City views', 'Close to shopping'],
+                    income: '$520/week',
+                    yield: '4.7%',
+                    growth: '5.8% p.a.'
+                }
+            },
+            'Surry Hills': {
+                medianPrice: 1850000,
+                rentalYield: 2.8,
+                growthRate: 6.9,
+                vacancyRate: 1.5,
+                propertyTypes: ['Apartment', 'Terrace'],
+                infrastructure: ['Cafes', 'Nightlife', 'Transport'],
+                demographic: 'Young professionals',
+                risk: 'Low',
+                property: {
+                    title: 'Renovated Terrace',
+                    address: '78 Crown Street, Surry Hills NSW 2010',
+                    price: '$1,250,000',
+                    bedrooms: 3,
+                    bathrooms: 2,
+                    features: ['Period features', 'Designer kitchen', 'Courtyard'],
+                    income: '$850/week',
+                    yield: '3.5%',
+                    growth: '7.1% p.a.'
+                }
+            },
+            'Manly': {
+                medianPrice: 3250000,
+                rentalYield: 1.9,
+                growthRate: 9.3,
+                vacancyRate: 0.8,
+                propertyTypes: ['Apartment', 'House'],
+                infrastructure: ['Beach', 'Ferry', 'Dining'],
+                demographic: 'Affluent families',
+                risk: 'Low',
+                property: {
+                    title: 'Beach Apartment',
+                    address: '22 The Corso, Manly NSW 2095',
+                    price: '$1,450,000',
+                    bedrooms: 2,
+                    bathrooms: 2,
+                    features: ['Ocean views', 'Modern kitchen', 'Walk to ferry'],
+                    income: '$750/week',
+                    yield: '2.7%',
+                    growth: '9.5% p.a.'
+                }
+            },
+            'Randwick': {
+                medianPrice: 2150000,
+                rentalYield: 2.5,
+                growthRate: 7.1,
+                vacancyRate: 1.3,
+                propertyTypes: ['Apartment', 'House'],
+                infrastructure: ['University', 'Hospital', 'Racecourse'],
+                demographic: 'Professionals',
+                risk: 'Low',
+                property: {
+                    title: 'Garden Apartment',
+                    address: '35 Alison Road, Randwick NSW 2031',
+                    price: '$850,000',
+                    bedrooms: 2,
+                    bathrooms: 1,
+                    features: ['Garden access', 'Renovated', 'Near UNSW'],
+                    income: '$580/week',
+                    yield: '3.5%',
+                    growth: '6.8% p.a.'
+                }
+            }
+        };
+
+        // Format number as currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+        }
+
+        // Initialize budget slider
+        const budgetSlider = document.getElementById('budget');
+        const budgetValue = document.getElementById('budget-value');
+
+        budgetSlider.addEventListener('input', function() {
+            budgetValue.textContent = parseInt(this.value).toLocaleString();
+        });
+
+        // Initialize investment goal options
+        const goalOptions = document.querySelectorAll('.goal-option');
+        const investmentGoalInput = document.getElementById('investment-goal');
+
+        goalOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                goalOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                investmentGoalInput.value = this.dataset.goal;
+            });
+        });
+
+        // Handle form submission
+        const suburbForm = document.getElementById('suburb-form');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const btnText = document.getElementById('btn-text');
+        const loadingText = document.getElementById('loading-text');
+
+        suburbForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const suburb = document.getElementById('suburb').value;
+            const budget = parseInt(budgetSlider.value);
+            const investmentGoal = investmentGoalInput.value;
+            const email = document.getElementById('email').value;
+            
+            // Validate
+            if (!suburb || !email.includes('@')) return;
+            
+            // Show loading state
+            btnText.style.display = 'none';
+            loadingText.style.display = 'inline-block';
+            analyzeBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                processResults(suburb, budget, investmentGoal, email);
+            }, 1500);
+        });
+
+        // Process and display results
+        function processResults(suburb, budget, investmentGoal, email) {
+            // Fill in results
+            document.getElementById('user-email').textContent = email;
+            document.getElementById('result-suburb').textContent = suburb;
+            
+            const data = suburbData[suburb];
+            
+            // Suburb profile
+            document.getElementById('median-price').textContent = formatCurrency(data.medianPrice);
+            document.getElementById('rental-yield').textContent = data.rentalYield + '%';
+            document.getElementById('annual-growth').textContent = data.growthRate + '%';
+            document.getElementById('vacancy-rate').textContent = data.vacancyRate + '%';
+            
+            // Property types
+            const propertyTypesContainer = document.getElementById('property-types');
+            propertyTypesContainer.innerHTML = '';
+            data.propertyTypes.forEach(type => {
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.textContent = type;
+                propertyTypesContainer.appendChild(tag);
+            });
+            
+            // Infrastructure
+            const infrastructureContainer = document.getElementById('infrastructure');
+            infrastructureContainer.innerHTML = '';
+            data.infrastructure.forEach(item => {
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.textContent = item;
+                infrastructureContainer.appendChild(tag);
+            });
+            
+            // Investment match
+            document.getElementById('user-budget').textContent = formatCurrency(budget);
+            document.getElementById('user-goal').textContent = investmentGoal === 'growth' ? 'Capital Growth' : 'Rental Income';
+            
+            // Calculate match score based on goal
+            let matchScore;
+            if (investmentGoal === 'growth') {
+                matchScore = Math.round((data.growthRate / 10) * 100);
+            } else {
+                matchScore = Math.round((data.rentalYield / 5) * 100);
+            }
+            matchScore = Math.min(100, Math.max(50, matchScore)); // Keep between 50-100%
+            
+            document.getElementById('match-score-bar').style.width = matchScore + '%';
+            document.getElementById('match-score-value').textContent = matchScore + '%';
+            document.getElementById('risk-level').textContent = data.risk;
+            document.getElementById('demographic').textContent = data.demographic;
+            
+            // Property details
+            const property = data.property;
+            document.getElementById('property-title').textContent = property.title;
+            document.getElementById('property-address').textContent = property.address;
+            document.getElementById('property-price').textContent = property.price;
+            document.getElementById('property-bedrooms').textContent = property.bedrooms;
+            document.getElementById('property-bathrooms').textContent = property.bathrooms;
+            
+            // Property features
+            const featuresContainer = document.getElementById('property-features');
+            featuresContainer.innerHTML = '';
+            property.features.forEach(feature => {
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.textContent = feature;
+                featuresContainer.appendChild(tag);
+            });
+            
+            document.getElementById('property-income').textContent = property.income;
+            document.getElementById('property-yield').textContent = property.yield;
+            document.getElementById('property-growth').textContent = property.growth;
+            
+            // Show results, hide form
+            document.getElementById('analyzer-form').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Reset button state (for going back)
+            btnText.style.display = 'inline-block';
+            loadingText.style.display = 'none';
+            analyzeBtn.disabled = false;
+
+            // Track lead for analytics (would connect to CRM in production)
+            console.log('New lead:', {
+                email: email,
+                suburb: suburb,
+                budget: budget,
+                investmentGoal: investmentGoal,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // Back button functionality
+        document.getElementById('back-btn').addEventListener('click', function() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('analyzer-form').style.display = 'block';
+        });
+
+        // Initialize default values
+        budgetValue.textContent = parseInt(budgetSlider.value).toLocaleString();
+    </script>
+</body>
+</html>
